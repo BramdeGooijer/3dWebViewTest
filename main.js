@@ -1,43 +1,62 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let scene, camera, renderer, hlight, model, controls;
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+function init() {
+    // RENDERER AND LOADER
+    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-const loader = new GLTFLoader();
-loader.load( './public/shiba/scene.gltf', function ( gltf ) {
+    // SCENE
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdddddd);
 
-	scene.add( gltf.scene );
+    // CAMERA
+    camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
+    camera.position.x = 6;
+    camera.position.y = 3;
+    camera.position.z = 6;
+    camera.lookAt(0, 0, 0);
 
-}, undefined, function ( error ) {
+    controls = new OrbitControls(camera, renderer.domElement);
 
-	console.error( error );
+    // LIGHT
+    hlight = new THREE.AmbientLight(0x404040, 100);
+    scene.add(hlight);
 
-} );
+    let directionalLight = new THREE.DirectionalLight(0xffffff, 100);
+    directionalLight.position.set(0, 1, 0);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
 
-// const geometry = new THREE.BoxGeometry( 1, 1, 1);
-// const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-// const cube = new THREE.Mesh(geometry, material);
+    let light = new THREE.PointLight(0xc4c4c4, 10);
+    light.position.set(0, 300, 500);
+    scene.add(light);
+    let light2 = new THREE.PointLight(0xc4c4c4, 10);
+    light2.position.set(500, 100, 0);
+    scene.add(light);
+    let light3 = new THREE.PointLight(0xc4c4c4, 10);
+    light3.position.set(0, 100, -500);
+    scene.add(light);
+    let light4 = new THREE.PointLight(0xc4c4c4, 10);
+    light4.position.set(-500, 300, 0);
+    scene.add(light);
 
-// const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
-// const wireframe = new THREE.Mesh(geometry, wireframeMaterial);
 
-// scene.add(cube);
-// scene.add(wireframe);
+    let loader = new GLTFLoader();
+    loader.load('./public/theatre/scene.gltf', function(gltf) {
+        model = gltf.scene.children[0];
+        // model.scale.set(0.5, 0.5, 0.5);
 
-camera.position.z = 3;
-
-function animate() {
-    requestAnimationFrame(animate);
-    // cube.rotation.x += 0.01;
-    // cube.rotation.y += 0.01;
-    // wireframe.rotation.x += 0.01;
-    // wireframe.rotation.y += 0.01;
-    renderer.render(scene, camera);
+        scene.add(gltf.scene);
+        animate();
+    });
 }
-
-animate();
+function animate() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+init();
